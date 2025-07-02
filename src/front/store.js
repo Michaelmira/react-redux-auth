@@ -1,38 +1,54 @@
-export const initialStore=()=>{
-  return{
-    message: null,
-    todos: [
-      {
-        id: 1,
-        title: "Make the bed",
-        background: null,
-      },
-      {
-        id: 2,
-        title: "Do my homework",
-        background: null,
-      }
-    ]
+// src/front/store.js
+export const initialStore = () => {
+  return {
+    auth: {
+      isAuthenticated: !!sessionStorage.getItem('access_token'),
+      customer: null,
+      token: sessionStorage.getItem('access_token') || null
+    },
+    workOrders: []
   }
 }
 
 export default function storeReducer(store, action = {}) {
-  switch(action.type){
-    case 'set_hello':
+  switch(action.type) {
+    case 'login':
+      const { token, customer } = action.payload;
+      sessionStorage.setItem('access_token', token);
       return {
         ...store,
-        message: action.payload
+        auth: {
+          isAuthenticated: true,
+          customer: customer,
+          token: token
+        }
       };
-      
-    case 'add_task':
 
-      const { id,  color } = action.payload
-
+    case 'logout':
+      sessionStorage.removeItem('access_token');
       return {
         ...store,
-        todos: store.todos.map((todo) => (todo.id === id ? { ...todo, background: color } : todo))
+        auth: {
+          isAuthenticated: false,
+          customer: null,
+          token: null
+        },
+        workOrders: []
       };
+
+    case 'set_work_orders':
+      return {
+        ...store,
+        workOrders: action.payload || []
+      };
+
+    case 'add_work_order':
+      return {
+        ...store,
+        workOrders: [...(store.workOrders || []), action.payload]
+      };
+
     default:
-      throw Error('Unknown action.');
+      return store;
   }    
 }

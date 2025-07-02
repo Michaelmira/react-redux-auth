@@ -1,52 +1,42 @@
-import React, { useEffect } from "react"
-import rigoImageUrl from "../assets/img/rigo-baby.jpg";
-import useGlobalReducer from "../hooks/useGlobalReducer.jsx";
+import React, { useState } from "react";
+import { Navigate } from "react-router-dom";
+import useGlobalReducer from "../hooks/useGlobalReducer";
+import { LoginForm } from "../components/LoginForm";
+import { SignupForm } from "../components/SignupForm";
 
 export const Home = () => {
+  const { store } = useGlobalReducer();
+  const [showLogin, setShowLogin] = useState(true);
 
-	const { store, dispatch } = useGlobalReducer()
+  if (store.auth.isAuthenticated) {
+    return <Navigate to="/dashboard" replace />;
+  }
 
-	const loadMessage = async () => {
-		try {
-			const backendUrl = import.meta.env.VITE_BACKEND_URL
+  return (
+    <div className="container mt-5">
+      <div className="text-center mb-4">
+        <h1>Welcome to My App</h1>
+        <div className="btn-group" role="group">
+          <button 
+            className={`btn ${showLogin ? 'btn-primary' : 'btn-outline-primary'}`}
+            onClick={() => setShowLogin(true)}
+          >
+            Login
+          </button>
+          <button 
+            className={`btn ${!showLogin ? 'btn-primary' : 'btn-outline-primary'}`}
+            onClick={() => setShowLogin(false)}
+          >
+            Sign Up
+          </button>
+        </div>
+      </div>
 
-			if (!backendUrl) throw new Error("VITE_BACKEND_URL is not defined in .env file")
-
-			const response = await fetch(backendUrl + "/api/hello")
-			const data = await response.json()
-
-			if (response.ok) dispatch({ type: "set_hello", payload: data.message })
-
-			return data
-
-		} catch (error) {
-			if (error.message) throw new Error(
-				`Could not fetch the message from the backend.
-				Please check if the backend is running and the backend port is public.`
-			);
-		}
-
-	}
-
-	useEffect(() => {
-		loadMessage()
-	}, [])
-
-	return (
-		<div className="text-center mt-5">
-			<h1 className="display-4">Hello Rigo!!</h1>
-			<p className="lead">
-				<img src={rigoImageUrl} className="img-fluid rounded-circle mb-3" alt="Rigo Baby" />
-			</p>
-			<div className="alert alert-info">
-				{store.message ? (
-					<span>{store.message}</span>
-				) : (
-					<span className="text-danger">
-						Loading message from the backend (make sure your python 🐍 backend is running)...
-					</span>
-				)}
-			</div>
-		</div>
-	);
-}; 
+      <div className="row justify-content-center">
+        <div className="col-md-6">
+          {showLogin ? <LoginForm /> : <SignupForm />}
+        </div>
+      </div>
+    </div>
+  );
+};

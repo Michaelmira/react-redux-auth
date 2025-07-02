@@ -11,7 +11,9 @@ from api.routes import api
 from api.admin import setup_admin
 from api.commands import setup_commands
 
+
 from flask_jwt_extended import JWTManager
+from datetime import timedelta
 
 # from models import Person
 
@@ -33,9 +35,9 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 MIGRATE = Migrate(app, db, compare_type=True)
 db.init_app(app)
 
+# JWT Configuration - ONLY ESSENTIAL CHANGES
 app.config["JWT_SECRET_KEY"] = os.environ.get("FLASK_APP_KEY")
-app.config["JWT_ALGORITHM"] = "HS256"
-app.config["JWT_ACCESS_TOKEN_EXPIRES"] = 24 * 60 * 60
+app.config["JWT_ACCESS_TOKEN_EXPIRES"] = timedelta(hours=24)  # This was the key fix
 jwt = JWTManager(app)
 
 # add the admin
